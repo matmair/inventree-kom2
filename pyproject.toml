@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "inventree-kom2"
-version =  "1.0a0"
+version =  "1.0"
 description="Use InvenTree with KiCad"
 readme = "README.md"
 license = {text = "MIT license"}
