@@ -7,6 +7,8 @@ from InvenTree.permissions import auth_exempt
 from plugin import InvenTreePlugin
 from plugin.helpers import render_template
 from plugin.mixins import NavigationMixin, UrlsMixin
+from rest_framework.authtoken.models import Token
+from rest_framework.exceptions import PermissionDenied
 
 from .KiCadClasses import KiCadField, KiCadLibrary, KiCadSetting
 
@@ -50,7 +52,8 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
         # Render the template
 
         # Set up the settings url
-        ctx['settings_url'] = request.build_absolute_uri(reverse('plugin:inventree-kom2:settings'))
+        token, _ = Token.objects.get_or_create(user=request.user)
+        ctx['settings_url'] = f"{request.build_absolute_uri(reverse('plugin:inventree-kom2:settings'))}?token={token}"
 
         return HttpResponse(render_template(request, 'inventree_kom2/index.html', ctx))
 
@@ -59,7 +62,12 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
         """Show database settings as json."""
         settings = KiCadSetting()
 
-        settings.source.set_connection_string(path="~/Library/kom2/kom2.dylib", username="reader", password="readonly", server=request.build_absolute_uri("/"))
+        if request.GET and request.GET['token']:
+            settings.source.set_connection_string(path="~/Library/kom2/kom2.dylib", token=request.GET['token'], server=request.build_absolute_uri("/"))
+        else:
+            # Create DB user with readonly access
+            # settings.source.set_connection_string(path="~/Library/kom2/kom2.dylib", username="reader", password="readonly", server=request.build_absolute_uri("/"))
+            raise PermissionDenied({"error": "No token provided."})
         lib = KiCadLibrary()
         lib.fields = [
             KiCadField(column="IPN", name="IPN", visible_on_add=False, visible_in_chooser=True, show_name=True, inherit_properties=True),
