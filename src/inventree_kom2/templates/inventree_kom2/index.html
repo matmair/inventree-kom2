@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h3>Set up KiCad the Integration</h3>
+
+<div class="alert alert-warning" role="alert">This plugin requires KiCad 7.0 or later.</div>
+<p>We are going to use the <a href="https://github.com/clj/kom2">Kom2</a> plugin by <a href="https://github.com/clj">clj</a> to integrate KiCad with InvenTree.</p>
+
+<h4>Instructions</h4>
+
+<button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#macos_arm64" aria-expanded="false" aria-controls="collapseExample">
+MacOS (ARM)
+</button>
+<button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#macos_amd64" aria-expanded="false" aria-controls="collapseExample">
+MacOS (AMD)
+</button>
+
+<div class="collapse" id="macos_arm64"><div class="card card-body">
+    <h5>Install on MacOS (ARM)</h5>
+    <p>Install with the <a href="https://brew.sh/">Homebrew</a> package manager.</p>
+    <pre><code>
+brew install unixodbc
+mkdir ~/Library/kom2
+wget {{ macos_arm64 }} -O kicad-odbc-middleware.zip
+unzip kicad-odbc-middleware.zip -d ~/Library/kom2
+wget {{ settings_url }} -O ~/Library/kom2/inventree.kicad_dbl
+    </code></pre>
+</div></div>
+
+<div class="collapse" id="macos_amd64"><div class="card card-body">
+    <h5>Install on MacOS (AMD)</h5>
+    <p>Install with the <a href="https://brew.sh/">Homebrew</a> package manager.</p>
+    <pre><code>
+brew install unixodbc
+mkdir ~/Library/kom2
+wget {{ macos_amd64 }} -O kicad-odbc-middleware.zip
+unzip kicad-odbc-middleware.zip -d ~/Library/kom2
+wget {{ settings_url }} -O ~/Library/kom2/inventree.kicad_dbl
+    </code></pre>
+</div></div>
+
+<button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#linux_arm64" aria-expanded="false" aria-controls="collapseExample">
+Linux (ARM)
+</button>
+<button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#linux_amd64" aria-expanded="false" aria-controls="collapseExample">
+Linux (AMD)
+</button>
+<div class="collapse" id="linux_arm64"><div class="card card-body">
+    <h5>Install on Linux (ARM)</h5>
+    <p>You need to install unixodbc manually. Then download the following files</p>
+    <pre><code>
+{{ linux_arm64 }}
+{{ settings_url }}
+    </code></pre>
+    <p>Place the files in the following location <pre>~/Library/kom2</pre></p>
+</div></div>
+<div class="collapse" id="linux_amd64"><div class="card card-body">
+    <h5>Install on Linux (AMD)</h5>
+    <p>You need to install unixodbc manually. Then download the following files</p>
+    <pre><code>
+{{ linux_amd64 }}
+{{ settings_url }}
+    </code></pre>
+    <p>Place the files in the following location <pre>~/Library/kom2</pre></p>
+</div></div>
+
+<button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#windows_amd64" aria-expanded="false" aria-controls="collapseExample">
+Windows
+</button>
+
+<div class="collapse" id="windows_amd64"><div class="card card-body">
+    <h5>Install on Windows (AMD)</h5>
+    <p>You need to install unixodbc manually. Then download the following files</p>
+    <pre><code>
+{{ windows_amd64 }}
+{{ settings_url }}
+    </code></pre>
+    <p>Place the files in the following location <pre>~/Library/kom2</pre></p>
+</div></div>
+
+{% endblock content %}
