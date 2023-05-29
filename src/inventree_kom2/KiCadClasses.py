@@ -34,11 +34,15 @@ class KiCadSource:
     connection_string: str = "Driver=~/Library/kom2/kom2.dylib;username=reader;password=readonly;server=https://demo.inventree.org"
     timeout_seconds: int = 2
 
-    def set_connection_string(self, path:str, username:str, password: str, server: str):
+    def set_connection_string(self, path:str, server: str, username:str = None, password: str=None, token:str = None):
         """Set the connection string."""
         if not path.endswith("kom2.dylib"):
             path = path + "/kom2.dylib"
-        self.connection_string = f"Driver={path};username={username};password={password};server={server}"
+
+        if token:
+            self.connection_string = f"Driver={path};apitoken={token};server={server}"
+        else:
+            self.connection_string = f"Driver={path};username={username};password={password};server={server}"
 
 
 @dataclass
