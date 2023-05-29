@@ -1,79 +1,14 @@
 """Use InvenTree with KiCad."""
 
+import requests
+from django.http import HttpResponse
+from django.urls import re_path, reverse
+from InvenTree.permissions import auth_exempt
 from plugin import InvenTreePlugin
+from plugin.helpers import render_template
 from plugin.mixins import NavigationMixin, UrlsMixin
 
-from django.urls import re_path
-from django.http import Http404, HttpResponse
-from plugin.helpers import (MixinNotImplementedError, render_template,
-                            render_text)
-from InvenTree.permissions import auth_exempt
-from typing import List
-from dataclasses import dataclass, asdict, field
-from json import dumps
-
-import requests
-from django.template.loader import render_to_string
-import json
-from dataclasses import dataclass
-from django.urls import reverse
-
-# from django.utils.translation import gettext_lazy as _
-
-@dataclass
-class KiCadMetadata:
-    version: int = 0
-
-@dataclass
-class KiCadSource:
-    type: str = "odbc"
-    connection_string: str = "Driver=/Users/matmair/Library/kom2/kom2.dylib;username=reader;password=readonly;server=https://demo.inventree.org"
-    timeout_seconds: int = 2
-
-@dataclass
-class KiCadField:
-    column: str = "IPN"
-    name: str = "IPN"
-    visible_on_add: bool = False
-    visible_in_chooser: bool = True
-    show_name: bool = True
-    inherit_properties: bool = False
-
-@dataclass
-class KiCadProperties:
-    description: str = "description"
-    keywords: str = "keywords"
-
-
-@dataclass
-class KiCadLibrary:
-    name: str = "Resistors"
-    table: str = "Electronics/Passives/Resistors"
-    key: str = "IPN"
-    symbols: str = "parameter.Symbol"
-    footprints: str = "parameter.Footprint"
-    fields: List[KiCadField] = field(default_factory=list)
-    properties: KiCadProperties = field(default=KiCadProperties())
-
-class JsonClass:
-    @property
-    def __dict__(self):
-        """Get a python dictionary."""
-        return asdict(self)
-
-    @property
-    def json(self):
-        """Get the json formated string."""
-        return dumps(self.__dict__, indent=4)
-
-
-@dataclass
-class KiCadSetting(JsonClass):
-    meta: KiCadMetadata = field(default=KiCadMetadata())
-    name: str = "InvenTree Library"
-    description: str = "Components pulled from InvenTree"
-    source: KiCadSource = field(default=KiCadSource())
-    libraries: List[KiCadLibrary] = field(default_factory=list)
+from .KiCadClasses import KiCadField, KiCadLibrary, KiCadSetting
 
 
 class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
@@ -99,7 +34,7 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
         ]
 
     def index_func(self, request):
-        """Setup page."""
+        """Render index page with install instructions."""
         url = 'https://api.github.com/repos/clj/kom2/releases/latest'
         refs = ['linux-amd64', 'linux-arm64', 'macos-amd64', 'macos-arm64', 'windows-amd64']
 
@@ -118,11 +53,10 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
         ctx['settings_url'] = request.build_absolute_uri(reverse('plugin:inventree-kom2:settings'))
 
         return HttpResponse(render_template(request, 'inventree_kom2/index.html', ctx))
-    
+
     @auth_exempt
     def settings_func(self, request):
-        """Setup page."""
-
+        """Show database settings as json."""
         settings = KiCadSetting()
 
         lib = KiCadLibrary()
