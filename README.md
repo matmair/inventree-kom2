@@ -16,3 +16,8 @@ A new panel KiCad will appear in the main naviagtion. You can download and setup
 
 ## License
 This project is licensed as MIT license.
+
+## Current state: beta
+This plugin is in a early state. It is not recommended to use it in production. You can use it to test the functionality (both of the plugin but also kom2) and report bugs, it assumes the data structure of the [demo dataset](https://github.com/inventree/demo-dataset).
+
+There are no instructions for Windows or Linux, feel free to suggest them.
