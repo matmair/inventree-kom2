@@ -59,6 +59,7 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
         """Show database settings as json."""
         settings = KiCadSetting()
 
+        settings.source.set_connection_string(path="~/Library/kom2/kom2.dylib", username="reader", password="readonly", server=request.build_absolute_uri("/"))
         lib = KiCadLibrary()
         lib.fields = [
             KiCadField(column="IPN", name="IPN", visible_on_add=False, visible_in_chooser=True, show_name=True, inherit_properties=True),

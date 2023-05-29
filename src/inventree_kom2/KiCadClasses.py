@@ -31,8 +31,14 @@ class KiCadSource:
     """KiCad database source class."""
 
     type: str = "odbc"
-    connection_string: str = "Driver=/Users/matmair/Library/kom2/kom2.dylib;username=reader;password=readonly;server=https://demo.inventree.org"
+    connection_string: str = "Driver=~/Library/kom2/kom2.dylib;username=reader;password=readonly;server=https://demo.inventree.org"
     timeout_seconds: int = 2
+
+    def set_connection_string(self, path:str, username:str, password: str, server: str):
+        """Set the connection string."""
+        if not path.endswith("kom2.dylib"):
+            path = path + "/kom2.dylib"
+        self.connection_string = f"Driver={path};username={username};password={password};server={server}"
 
 
 @dataclass
