@@ -1,2 +1,3 @@
 include LICENSE
 include README.md
+recursive-include src/inventree_kom2/templates *
