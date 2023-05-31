@@ -25,6 +25,12 @@ wget {{ macos_arm64 }} -O kicad-odbc-middleware.zip
 unzip kicad-odbc-middleware.zip -d ~/Library/kom2
 wget {{ settings_url }} -O ~/Library/kom2/inventree.kicad_dbl
     </code></pre>
+    <h5>Update on MacOS (ARM)</h5>
+    <pre><code>
+wget {{ macos_arm64 }} -O kicad-odbc-middleware.zip
+unzip kicad-odbc-middleware.zip -d ~/Library/kom2
+wget {{ settings_url }} -O ~/Library/kom2/inventree.kicad_dbl
+    </code></pre>
 </div></div>
 
 <div class="collapse" id="macos_amd64"><div class="card card-body">
@@ -33,6 +39,12 @@ wget {{ settings_url }} -O ~/Library/kom2/inventree.kicad_dbl
     <pre><code>
 brew install unixodbc
 mkdir ~/Library/kom2
+wget {{ macos_amd64 }} -O kicad-odbc-middleware.zip
+unzip kicad-odbc-middleware.zip -d ~/Library/kom2
+wget {{ settings_url }} -O ~/Library/kom2/inventree.kicad_dbl
+    </code></pre>
+    <h5>Update on MacOS (AMD)</h5>
+    <pre><code>
 wget {{ macos_amd64 }} -O kicad-odbc-middleware.zip
 unzip kicad-odbc-middleware.zip -d ~/Library/kom2
 wget {{ settings_url }} -O ~/Library/kom2/inventree.kicad_dbl
