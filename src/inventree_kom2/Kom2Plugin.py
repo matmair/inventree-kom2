@@ -34,6 +34,7 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
         return [
             re_path(r'script', self.script_func, name='script'),
             re_path(r'settings/', self.settings_func, name='settings'),
+            re_path(r'api/tables', self.api_tables, name='api_tables'),
             re_path(r'', self.index_func, name='index'),
         ]
 
@@ -62,15 +63,22 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
     @auth_exempt
     def settings_func(self, request):
         """Show database settings as json."""
-        settings = KiCadSetting()
-
         if request.GET and request.GET['token']:
-            settings.source.set_connection_string(path="~/Library/kom2/kom2.dylib", token=request.GET['token'], server=request.build_absolute_uri("/"))
-        else:
-            # Create DB user with readonly access
-            # settings.source.set_connection_string(path="~/Library/kom2/kom2.dylib", username="reader", password="readonly", server=request.build_absolute_uri("/"))
-            raise PermissionDenied({"error": "No token provided."})
+            server = request.build_absolute_uri("/")
+            token = request.GET['token']
 
+            settings = self.get_settings(server, token)
+            # Render the template
+            return HttpResponse(settings.json, content_type='application/json')
+
+        # Create DB user with readonly access
+        # settings.source.set_connection_string(path="~/Library/kom2/kom2.dylib", username="reader", password="readonly", server=request.build_absolute_uri("/"))
+        raise PermissionDenied({"error": "No token provided."})
+
+    def get_settings(self, server, token):
+        """Get the settings for kom2."""
+        settings = KiCadSetting()
+        settings.source.set_connection_string(path="~/Library/kom2/kom2.dylib", token=token, server=server)
         lib = KiCadLibrary()
         lib.fields = [
             KiCadField(column="IPN", name="IPN", visible_on_add=False, visible_in_chooser=True, show_name=True, inherit_properties=True),
@@ -78,9 +86,7 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
             KiCadField(column="parameter.Package", name="Package", visible_on_add=True, visible_in_chooser=True, show_name=False)
         ]
         settings.libraries = [lib]
-
-        # Render the template
-        return HttpResponse(settings.json, content_type='application/json')
+        return settings
 
     def script_func(self, request):
         """Return the script.js file."""
