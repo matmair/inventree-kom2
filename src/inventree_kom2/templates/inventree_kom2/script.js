@@ -11,15 +11,25 @@ async function currentSettings() {
     return tables;
 }
 
+function trueFalseLabel(value) {
+    return value ? html`<span class="badge bg-success">True</span>` : html`<span class="badge bg-danger">False</span>`;
+}
+
 export class Kom2Settings extends Component {
     async componentDidMount() {
         let data = await currentSettings();
         this.setState({ data: data });
     }
+
+    async refreshTable() {
+      this.setState({ data: await currentSettings() });
+  }
+
     render({ }, { data }) {
         if (!data) return html`<p>loading...</p>`;
 
         return (html`
+        <button onClick=${() => this.refreshTable()}>Refresh</button>
 
         <div class="accordion">
         ${data.libraries ? data.libraries.map(library => html`
@@ -33,8 +43,26 @@ export class Kom2Settings extends Component {
             Key: ${library.key}<br/>
             Symbols: ${library.symbols}<br/>
             Footprints: ${library.footprints}<br/>
-            Fields: ${library.fields}<br/>
-            Properties: ${library.properties}<br/>
+            Description: ${library.properties.description}<br/>
+            Keywords: ${library.properties.keywords}<br/>
+            Fields:<br/>
+            <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">DB</th>
+                <th scope="col">Name</th>
+                <th scope="col">On Add</th>
+                <th scope="col">In Chooser</th>
+                <th scope="col">Show Name</th>
+                <th scope="col">Inherit Properties</th>
+              </tr>
+            </thead>
+            <tbody>
+            ${library.fields ? library.fields.map(field => html`<tr>
+            <td>${field.column}</td><td>${field.name}</td><td>${trueFalseLabel(field.visible_on_add)}</td><td>${trueFalseLabel(field.visible_in_chooser)}</td><td>${trueFalseLabel(field.show_name)}</td><td>${trueFalseLabel(field.inherit_properties)}</td>
+            </tr>`): html`<p>No fields</p>`}
+            </tbody>
+            </table>
           </div></div>
         </div>
         `): html`<p>No libraries</p>`}

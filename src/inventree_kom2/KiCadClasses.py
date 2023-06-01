@@ -66,7 +66,7 @@ class KiCadProperties:
 
 
 @dataclass
-class KiCadLibrary:
+class KiCadLibrary(JsonClass):
     """KiCad database library class."""
 
     name: str = "Resistors"

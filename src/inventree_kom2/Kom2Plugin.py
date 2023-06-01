@@ -1,7 +1,9 @@
 """Use InvenTree with KiCad."""
 
+from uuid import uuid4
+
 import requests
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template.response import TemplateResponse
 from django.urls import re_path, reverse
 from InvenTree.permissions import auth_exempt
@@ -91,3 +93,14 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
     def script_func(self, request):
         """Return the script.js file."""
         return TemplateResponse(request, 'inventree_kom2/script.js', content_type='application/javascript')
+
+    def api_tables(self, request):
+        """Return the tables as json."""
+        settings = self.get_settings(request.build_absolute_uri("/"), 'token')
+
+        libs = [x.__dict__ for x in settings.libraries]
+        # Add keys
+        for lib in libs:
+            lib['id'] = f'id{uuid4()}'  # Add a random id
+
+        return JsonResponse({'libraries': libs, 'test': 'test2'})
