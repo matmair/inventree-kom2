@@ -2,6 +2,7 @@
 
 import requests
 from django.http import HttpResponse
+from django.template.response import TemplateResponse
 from django.urls import re_path, reverse
 from InvenTree.permissions import auth_exempt
 from plugin import InvenTreePlugin
@@ -31,6 +32,7 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
     def setup_urls(self):
         """Urls that are exposed by this plugin."""
         return [
+            re_path(r'script', self.script_func, name='script'),
             re_path(r'settings/', self.settings_func, name='settings'),
             re_path(r'', self.index_func, name='index'),
         ]
@@ -68,6 +70,7 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
             # Create DB user with readonly access
             # settings.source.set_connection_string(path="~/Library/kom2/kom2.dylib", username="reader", password="readonly", server=request.build_absolute_uri("/"))
             raise PermissionDenied({"error": "No token provided."})
+
         lib = KiCadLibrary()
         lib.fields = [
             KiCadField(column="IPN", name="IPN", visible_on_add=False, visible_in_chooser=True, show_name=True, inherit_properties=True),
@@ -78,3 +81,7 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
 
         # Render the template
         return HttpResponse(settings.json, content_type='application/json')
+
+    def script_func(self, request):
+        """Return the script.js file."""
+        return TemplateResponse(request, 'inventree_kom2/script.js', content_type='application/javascript')

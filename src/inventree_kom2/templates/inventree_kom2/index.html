@@ -93,4 +93,13 @@ Windows
 <p>Once you have installed the files, add the library (under Preferences -> Manage Symbol Libraries) to you global or project settings with a library path of <code>~/Library/kom2/inventree.kicad_dbl</code> - You will need to use the absolut path of the file.</p>
 <div class="alert alert-warning" role="alert">Do not share the config file, it contains your API credentials.</div>
 
+<h4>Settings</h4>
+<div id="inventree-kom2/root" style="background: lightgray; min-width: 100px; min-height: 50px;"></div>
 {% endblock content %}
+
+
+{% block js %}
+<script type="module">
+    import './script';
+  </script>
+{% endblock js %}
