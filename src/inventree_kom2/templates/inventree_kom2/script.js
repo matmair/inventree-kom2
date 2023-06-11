@@ -196,7 +196,7 @@ export class Kom2Settings extends Component {
         if (this.props.edit) {
           let data = this.props.data;
           this.setState({
-            val_db: data.column,
+            val_column: data.column,
             val_name: data.name,
             val_visible_on_add: data.visible_on_add,
             val_visible_in_chooser: data.visible_in_chooser,
