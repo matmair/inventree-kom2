@@ -24,6 +24,19 @@ async function createSetting(data) {
   return tables;
 }
 
+async function deleteSetting(data) {
+  const response = await fetch('api/table-delete', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: JSON.stringify({ data })
+  })
+  const tables = await response.json();
+  return tables;
+}
+
 function trueFalseLabel(value) {
   return value ? html`<span class="badge bg-success">True</span>` : html`<span class="badge bg-danger">False</span>`;
 }
@@ -131,6 +144,18 @@ export class Kom2Settings extends Component {
     this.addTable(data, true);
   }
 
+  async deleteTable(id) {
+    if (confirm('Are you sure?')) {
+      deleteSetting({ id: id }).then(resp => {
+        if (resp.status == 'ok') {
+          this.refreshTable();
+        } else {
+          alert('Error');
+        }
+      });
+    }
+  }
+
   async refreshTable() {
     this.setState({ data: await currentSettings() });
   }
@@ -147,7 +172,9 @@ export class Kom2Settings extends Component {
         <div class="accordion-item">
           <h2 class="accordion-header" id="head-${library.id}">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#${library.id}" aria-expanded="true" aria-controls="${library.id}">
-            ${library.name}<button type="button" class="btn btn-primary" onClick=${() => this.editTable({ data: library })}>Edit</button>
+            ${library.name}
+            <button type="button" class="btn btn-primary" onClick=${() => this.editTable({ data: library })}>Edit</button>
+            <button type="button" class="btn btn-primary" onClick=${() => this.deleteTable(library.id)}>Delete</button>
           </button>
           </h2>
           <div id="${library.id}" class="accordion-collapse collapse" aria-labelledby="head-${library.id}"><div class="accordion-body">

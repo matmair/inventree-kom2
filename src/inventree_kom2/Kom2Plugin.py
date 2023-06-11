@@ -40,6 +40,7 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
             re_path(r'settings/', self.settings_func, name='settings'),
             re_path(r'api/tables', self.api_tables, name='api_tables'),
             re_path(r'api/table-add', self.api_table_add, name='api_table-add'),
+            re_path(r'api/table-delete', self.api_table_delete, name='api_table-delete'),
             re_path(r'', self.index_func, name='index'),
         ]
 
@@ -149,6 +150,24 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
 
                 settings = self.get_settings(request.build_absolute_uri("/"), 'token')
                 settings.libraries.append(table)
+
+            # Save table
+            self.set_settings(settings)
+
+            return JsonResponse({'status': 'ok'})
+        return JsonResponse({'status': 'error'})
+
+    def api_table_delete(self, request):
+        """Delete a table."""
+        data = request.body
+        if data:
+            data = json.loads(data.decode('utf-8'))['data']
+
+            # Delete Table
+            settings = self.get_settings(request.build_absolute_uri("/"), 'token')
+            for lib in settings.libraries:
+                if 'id' + lib.id == data['id']:
+                    settings.libraries.remove(lib)
 
             # Save table
             self.set_settings(settings)
