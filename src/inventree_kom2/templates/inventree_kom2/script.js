@@ -164,18 +164,22 @@ export class Kom2Settings extends Component {
     if (!data) return html`<p>loading...</p>`;
 
     return (html`
-        <button type="button" class="btn btn-primary" onClick=${() => this.addTable()}>New table</button>
+      <div class="d-grid gap-2 w-100 py-2 d-md-flex justify-content-md-end">
+        <button type="button" class="btn btn-primary" onClick=${() => this.addTable()}>Add table</button>
         <button type="button" class="btn btn-primary" onClick=${() => this.refreshTable()}>Refresh</button>
+      </div>
 
         <div class="accordion">
         ${data.libraries ? data.libraries.map(library => html`
         <div class="accordion-item">
           <h2 class="accordion-header" id="head-${library.id}">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#${library.id}" aria-expanded="true" aria-controls="${library.id}">
-            ${library.name}
-            <button type="button" class="btn btn-primary" onClick=${() => this.editTable({ data: library })}>Edit</button>
-            <button type="button" class="btn btn-primary" onClick=${() => this.deleteTable(library.id)}>Delete</button>
-          </button>
+              ${library.name}
+              <div class="d-grid gap-2 w-100 d-md-flex justify-content-md-end">
+                <button type="button" class="btn btn-outline-primary" onClick=${() => this.editTable({ data: library })}>Edit</button>
+                <button type="button" class="btn btn-outline-danger me-4" onClick=${() => this.deleteTable(library.id)}>Delete</button>
+              </div>
+            </button>
           </h2>
           <div id="${library.id}" class="accordion-collapse collapse" aria-labelledby="head-${library.id}"><div class="accordion-body">
             Id: ${library.id}<br/>
