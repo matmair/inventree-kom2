@@ -30,6 +30,7 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
     ]
     NAVIGATION_TAB_NAME = "KiCad"
     NAVIGATION_TAB_ICON = 'fas fa-database'
+    MIN_VERSION = '0.12.0'
 
     # Urls
     def setup_urls(self):
