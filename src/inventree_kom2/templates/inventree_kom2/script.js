@@ -136,22 +136,22 @@ export class Kom2Settings extends Component {
         this.parent = parent;
         return (html`
             <form onSubmit=${this.onSubmit}>
-              <p>Name</p>
+              <label>Name</label>
               <input type="text" value=${val_name} onInput=${e => this.onInput(e, 'val_name')} />
-              <p>Table</p>
+              <label>Table</label>
               <input type="text" value=${val_table} onInput=${e => this.onInput(e, 'val_table')} />
-              <p>Key</p>
+              <label>Key</label>
               <input type="text" value=${val_key} onInput=${e => this.onInput(e, 'val_key')} />
-              <p>Symbols</p>
+              <label>Symbols</label>
               <input type="text" value=${val_symbols} onInput=${e => this.onInput(e, 'val_symbols')} />
-              <p>Footprints</p>
+              <label>Footprints</label>
               <input type="text" value=${val_footprints} onInput=${e => this.onInput(e, 'val_footprints')} />
-              <p>Description</p>
+              <label>Description</label>
               <input type="text" value=${val_description} onInput=${e => this.onInput(e, 'val_description')} />
-              <p>Keywords</p>
+              <label>Keywords</label>
               <input type="text" value=${val_keywords} onInput=${e => this.onInput(e, 'val_keywords')} />
 
-              <button type="submit">Submit</button>
+              <button type="submit" class="btn btn-primary">Submit</button>
             </form>`
         );
       }
@@ -241,20 +241,20 @@ export class Kom2Settings extends Component {
         return (html`
 
             <form onSubmit=${this.onSubmit}>
-              <p>DB</p>
+              <label>DB</label>
               <input type="text" value=${val_column} onInput=${e => this.onInput(e, 'val_column')} disabled=${edit}/>
-              <p>Name</p>
+              <label>Name</label>
               <input type="text" value=${val_name} onInput=${e => this.onInput(e, 'val_name')} />
-              <p>On add</p>
+              <label>On add</label>
               <input type="checkbox" checked=${val_visible_on_add} onInput=${e => this.onInput(e, 'val_visible_on_add')} />
-              <p>In chooser</p>
+              <label>In chooser</label>
               <input type="checkbox" checked=${val_visible_in_chooser} onInput=${e => this.onInput(e, 'val_visible_in_chooser')} />
-              <p>Show name</p>
+              <label>Show name</label>
               <input type="checkbox" checked=${val_show_name} onInput=${e => this.onInput(e, 'val_show_name')} />
-              <p>Inherited</p>
+              <label>Inherited</label>
               <input type="checkbox" checked=${val_inherit_properties} onInput=${e => this.onInput(e, 'val_inherit_properties')} />
 
-              <button type="submit">Submit</button>
+              <button type="submit" class="btn btn-primary">Submit</button>
             </form>`
         );
       }
