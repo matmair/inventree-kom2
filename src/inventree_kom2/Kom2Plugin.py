@@ -129,13 +129,26 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
         if data:
             data = json.loads(data.decode('utf-8'))['data']
 
-            # Create Table
-            table = KiCadLibrary(id=str(uuid4()), name=data['name'], table=data['table'], key=data['key'], symbols=data['symbols'], footprints=data['footprints'])
-            table.properties.description = data['description']
-            table.properties.keywords = data['keywords']
+            # If id is passed - update
+            if data['id']:
+                settings = self.get_settings(request.build_absolute_uri("/"), 'token')
+                for lib in settings.libraries:
+                    if 'id' + lib.id == data['id']:
+                        lib.name = data['name']
+                        lib.table = data['table']
+                        lib.key = data['key']
+                        lib.symbols = data['symbols']
+                        lib.footprints = data['footprints']
+                        lib.properties.description = data['description']
+                        lib.properties.keywords = data['keywords']
+            else:
+                # Create Table
+                table = KiCadLibrary(id=str(uuid4()), name=data['name'], table=data['table'], key=data['key'], symbols=data['symbols'], footprints=data['footprints'])
+                table.properties.description = data['description']
+                table.properties.keywords = data['keywords']
 
-            settings = self.get_settings(request.build_absolute_uri("/"), 'token')
-            settings.libraries.append(table)
+                settings = self.get_settings(request.build_absolute_uri("/"), 'token')
+                settings.libraries.append(table)
 
             # Save table
             self.set_settings(settings)

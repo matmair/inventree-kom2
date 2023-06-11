@@ -34,7 +34,7 @@ export class Kom2Settings extends Component {
     this.setState({ data: data });
   }
 
-  async addTable() {
+  async addTable(data, edit) {
     class TodoForm extends Component {
       state = {
         val_name: '',
@@ -45,10 +45,26 @@ export class Kom2Settings extends Component {
         val_description: '',
         val_keywords: '',
       };
+      async componentDidMount() {
+        if (this.props.edit) {
+          let data = this.props.data;
+          this.setState({
+            val_name: data.name,
+            val_table: data.table,
+            val_key: data.key,
+            val_symbols: data.symbols,
+            val_footprints: data.footprints,
+            val_description: data.properties.description,
+            val_keywords: data.properties.keywords,
+          });
+        }
+      }
 
       onSubmit = e => {
         e.preventDefault();
-        let resp = createSetting({
+
+        // Define data
+        let data = {
           name: this.state.val_name,
           table: this.state.val_table,
           key: this.state.val_key,
@@ -56,7 +72,13 @@ export class Kom2Settings extends Component {
           footprints: this.state.val_footprints,
           description: this.state.val_description,
           keywords: this.state.val_keywords,
-        }).then(resp => {
+        }
+        if (this.props.edit) {
+          data.id = this.props.data.id;
+        }
+
+        // Process
+        createSetting(data).then(resp => {
           if (resp.status == 'ok') {
             this.parent.refreshTable();
             $(modal).modal('hide');
@@ -71,7 +93,7 @@ export class Kom2Settings extends Component {
         this.setState({ [name]: value })
       }
 
-      render({ parent }, { val_name, val_table, val_key, val_symbols, val_footprints, val_description, val_keywords }) {
+      render({ parent, data, edit }, { val_name, val_table, val_key, val_symbols, val_footprints, val_description, val_keywords }) {
         this.parent = parent;
         return (html`
             <form onSubmit=${this.onSubmit}>
@@ -101,8 +123,12 @@ export class Kom2Settings extends Component {
       closeText: 'Close',
       hideSubmitButton: true,
     });
-    render(html`<${TodoForm} parent=${this}/>`, document.getElementById('form-content'));
+    render(html`<${TodoForm} parent=${this} data=${data} edit=${edit}/>`, document.getElementById('form-content'));
     $(modal).modal('show');
+  }
+
+  async editTable({ data }) {
+    this.addTable(data, true);
   }
 
   async refreshTable() {
@@ -120,7 +146,9 @@ export class Kom2Settings extends Component {
         ${data.libraries ? data.libraries.map(library => html`
         <div class="accordion-item">
           <h2 class="accordion-header" id="head-${library.id}">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#${library.id}" aria-expanded="true" aria-controls="${library.id}">${library.name}</button>
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#${library.id}" aria-expanded="true" aria-controls="${library.id}">
+            ${library.name}<button type="button" class="btn btn-primary" onClick=${() => this.editTable({ data: library })}>Edit</button>
+          </button>
           </h2>
           <div id="${library.id}" class="accordion-collapse collapse" aria-labelledby="head-${library.id}"><div class="accordion-body">
             Id: ${library.id}<br/>

@@ -78,6 +78,16 @@ class KiCadLibrary(JsonClass):
     fields: List[KiCadField] = field(default_factory=list)
     properties: KiCadProperties = field(default=KiCadProperties())
 
+    def from_json(self, **kwargs):
+        """Load the settings from a json string."""
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+        self.fields = [KiCadField(**x) for x in kwargs['fields']]
+        self.properties = KiCadProperties(**kwargs['properties'])
+
+        return self
+
 
 @dataclass
 class KiCadSetting(JsonClass):
@@ -96,4 +106,6 @@ class KiCadSetting(JsonClass):
         self.name = kwargs['name']
         self.description = kwargs['description']
         self.source = KiCadSource(kwargs['source'])
-        self.libraries = [KiCadLibrary(**x) for x in kwargs['libraries']]
+        self.libraries = [KiCadLibrary().from_json(**x) for x in kwargs['libraries']]
+
+        return self
