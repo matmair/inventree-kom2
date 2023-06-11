@@ -69,6 +69,7 @@ class KiCadProperties:
 class KiCadLibrary(JsonClass):
     """KiCad database library class."""
 
+    id: str = ""
     name: str = "Resistors"
     table: str = "Electronics/Passives/Resistors"
     key: str = "IPN"
@@ -87,3 +88,12 @@ class KiCadSetting(JsonClass):
     description: str = "Components pulled from InvenTree"
     source: KiCadSource = field(default=KiCadSource())
     libraries: List[KiCadLibrary] = field(default_factory=list)
+
+    def from_json(self, **kwargs):
+        """Load the settings from a json string."""
+        # default
+        self.meta = KiCadMetadata(kwargs['meta'])
+        self.name = kwargs['name']
+        self.description = kwargs['description']
+        self.source = KiCadSource(kwargs['source'])
+        self.libraries = [KiCadLibrary(**x) for x in kwargs['libraries']]

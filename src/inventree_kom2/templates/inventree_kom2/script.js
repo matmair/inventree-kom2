@@ -11,6 +11,19 @@ async function currentSettings() {
   return tables;
 }
 
+async function createSetting(data) {
+  const response = await fetch('api/table-add', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: JSON.stringify({ data })
+  });
+  const tables = await response.json();
+  return tables;
+}
+
 function trueFalseLabel(value) {
   return value ? html`<span class="badge bg-success">True</span>` : html`<span class="badge bg-danger">False</span>`;
 }
@@ -21,6 +34,77 @@ export class Kom2Settings extends Component {
     this.setState({ data: data });
   }
 
+  async addTable() {
+    class TodoForm extends Component {
+      state = {
+        val_name: '',
+        val_table: '',
+        val_key: '',
+        val_symbols: '',
+        val_footprints: '',
+        val_description: '',
+        val_keywords: '',
+      };
+
+      onSubmit = e => {
+        e.preventDefault();
+        let resp = createSetting({
+          name: this.state.val_name,
+          table: this.state.val_table,
+          key: this.state.val_key,
+          symbols: this.state.val_symbols,
+          footprints: this.state.val_footprints,
+          description: this.state.val_description,
+          keywords: this.state.val_keywords,
+        }).then(resp => {
+          if (resp.status == 'ok') {
+            this.parent.refreshTable();
+            $(modal).modal('hide');
+          } else {
+            alert('Error');
+          }
+        });
+      }
+
+      onInput = (e, name) => {
+        const { value } = e.target;
+        this.setState({ [name]: value })
+      }
+
+      render({ parent }, { val_name, val_table, val_key, val_symbols, val_footprints, val_description, val_keywords }) {
+        this.parent = parent;
+        return (html`
+            <form onSubmit=${this.onSubmit}>
+              <p>Name</p>
+              <input type="text" value=${val_name} onInput=${e => this.onInput(e, 'val_name')} />
+              <p>Table</p>
+              <input type="text" value=${val_table} onInput=${e => this.onInput(e, 'val_table')} />
+              <p>Key</p>
+              <input type="text" value=${val_key} onInput=${e => this.onInput(e, 'val_key')} />
+              <p>Symbols</p>
+              <input type="text" value=${val_symbols} onInput=${e => this.onInput(e, 'val_symbols')} />
+              <p>Footprints</p>
+              <input type="text" value=${val_footprints} onInput=${e => this.onInput(e, 'val_footprints')} />
+              <p>Description</p>
+              <input type="text" value=${val_description} onInput=${e => this.onInput(e, 'val_description')} />
+              <p>Keywords</p>
+              <input type="text" value=${val_keywords} onInput=${e => this.onInput(e, 'val_keywords')} />
+
+              <button type="submit">Submit</button>
+            </form>`
+        );
+      }
+    }
+
+    var modal = createNewModal({
+      title: 'Add new table',
+      closeText: 'Close',
+      hideSubmitButton: true,
+    });
+    render(html`<${TodoForm} parent=${this}/>`, document.getElementById('form-content'));
+    $(modal).modal('show');
+  }
+
   async refreshTable() {
     this.setState({ data: await currentSettings() });
   }
@@ -29,6 +113,7 @@ export class Kom2Settings extends Component {
     if (!data) return html`<p>loading...</p>`;
 
     return (html`
+        <button type="button" class="btn btn-primary" onClick=${() => this.addTable()}>New table</button>
         <button type="button" class="btn btn-primary" onClick=${() => this.refreshTable()}>Refresh</button>
 
         <div class="accordion">
