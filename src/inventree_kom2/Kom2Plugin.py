@@ -1,5 +1,6 @@
 """Use InvenTree with KiCad."""
 
+import json
 from uuid import uuid4
 
 import requests
@@ -29,6 +30,7 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
     ]
     NAVIGATION_TAB_NAME = "KiCad"
     NAVIGATION_TAB_ICON = 'fas fa-database'
+    MIN_VERSION = '0.12.0'
 
     # Urls
     def setup_urls(self):
@@ -37,6 +39,10 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
             re_path(r'script', self.script_func, name='script'),
             re_path(r'settings/', self.settings_func, name='settings'),
             re_path(r'api/tables', self.api_tables, name='api_tables'),
+            re_path(r'api/table-add', self.api_table_add, name='api_table-add'),
+            re_path(r'api/table-delete', self.api_table_delete, name='api_table-delete'),
+            re_path(r'api/field-add', self.api_field_add, name='api_field-add'),
+            re_path(r'api/field-delete', self.api_field_delete, name='api_field-delete'),
             re_path(r'', self.index_func, name='index'),
         ]
 
@@ -79,16 +85,31 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
 
     def get_settings(self, server, token):
         """Get the settings for kom2."""
-        settings = KiCadSetting()
+        # Get data
+        data = self.db.get_metadata('kom2')
+        if data:
+            data = json.loads(data)
+            settings = KiCadSetting()
+            settings.from_json(**data)
+        else:
+            # Construct default objects
+            settings = KiCadSetting()
+            lib = KiCadLibrary(id=str(uuid4()))
+            lib.fields = [
+                KiCadField(column="IPN", name="IPN", visible_on_add=False, visible_in_chooser=True, show_name=True, inherit_properties=True),
+                KiCadField(column="parameter.Resistance", name="Resistance", visible_on_add=True, visible_in_chooser=True, show_name=True),
+                KiCadField(column="parameter.Package", name="Package", visible_on_add=True, visible_in_chooser=True, show_name=False)
+            ]
+            settings.libraries = [lib]
+
+        # Define access
         settings.source.set_connection_string(path="~/Library/kom2/kom2.dylib", token=token, server=server)
-        lib = KiCadLibrary()
-        lib.fields = [
-            KiCadField(column="IPN", name="IPN", visible_on_add=False, visible_in_chooser=True, show_name=True, inherit_properties=True),
-            KiCadField(column="parameter.Resistance", name="Resistance", visible_on_add=True, visible_in_chooser=True, show_name=True),
-            KiCadField(column="parameter.Package", name="Package", visible_on_add=True, visible_in_chooser=True, show_name=False)
-        ]
-        settings.libraries = [lib]
+
         return settings
+
+    def set_settings(self, settings: KiCadSetting):
+        """Set the settings for kom2."""
+        self.db.set_metadata('kom2', settings.json)
 
     def script_func(self, request):
         """Return the script.js file."""
@@ -101,6 +122,101 @@ class Kom2Plugin(UrlsMixin, NavigationMixin, InvenTreePlugin):
         libs = [x.__dict__ for x in settings.libraries]
         # Add keys
         for lib in libs:
-            lib['id'] = f'id{uuid4()}'  # Add a random id
+            lib['id'] = f'id{lib["id"]}'
 
         return JsonResponse({'libraries': libs, 'test': 'test2'})
+
+    def api_table_add(self, request):
+        """Add a table."""
+        data = request.body
+        if data:
+            data = json.loads(data.decode('utf-8'))['data']
+
+            # If id is passed - update
+            if data['id']:
+                settings = self.get_settings(request.build_absolute_uri("/"), 'token')
+                for lib in settings.libraries:
+                    if 'id' + lib.id == data['id']:
+                        lib.name = data['name']
+                        lib.table = data['table']
+                        lib.key = data['key']
+                        lib.symbols = data['symbols']
+                        lib.footprints = data['footprints']
+                        lib.properties.description = data['description']
+                        lib.properties.keywords = data['keywords']
+            else:
+                # Create Table
+                table = KiCadLibrary(id=str(uuid4()), name=data['name'], table=data['table'], key=data['key'], symbols=data['symbols'], footprints=data['footprints'])
+                table.properties.description = data['description']
+                table.properties.keywords = data['keywords']
+
+                settings = self.get_settings(request.build_absolute_uri("/"), 'token')
+                settings.libraries.append(table)
+
+            # Save table
+            self.set_settings(settings)
+
+            return JsonResponse({'status': 'ok'})
+        return JsonResponse({'status': 'error'})
+
+    def api_table_delete(self, request):
+        """Delete a table."""
+        data = request.body
+        if data:
+            data = json.loads(data.decode('utf-8'))['data']
+
+            # Delete Table
+            settings = self.get_settings(request.build_absolute_uri("/"), 'token')
+            for lib in settings.libraries:
+                if 'id' + lib.id == data['id']:
+                    settings.libraries.remove(lib)
+
+            # Save table
+            self.set_settings(settings)
+
+            return JsonResponse({'status': 'ok'})
+        return JsonResponse({'status': 'error'})
+
+    def api_field_add(self, request):
+        """Add a field."""
+        data = request.body
+        if data:
+            data = json.loads(data.decode('utf-8'))['data']
+
+            # Create Field
+            field = KiCadField(column=data['column'], name=data['name'], visible_on_add=data['visible_on_add'], visible_in_chooser=data['visible_in_chooser'], show_name=data['show_name'], inherit_properties=data['inherit_properties'])
+
+            # Save field
+            settings = self.get_settings(request.build_absolute_uri("/"), 'token')
+            for lib in settings.libraries:
+                if 'id' + lib.id == data['id']:
+                    found = [x for x in lib.fields if x.column == data['column']]
+                    if found:
+                        lib.fields.remove(found[0])
+                    lib.fields.append(field)
+
+            # Save table
+            self.set_settings(settings)
+
+            return JsonResponse({'status': 'ok'})
+        return JsonResponse({'status': 'error'})
+
+    def api_field_delete(self, request):
+        """Delete a field."""
+        data = request.body
+        if data:
+            data = json.loads(data.decode('utf-8'))['data']
+
+            # Delete Field
+            settings = self.get_settings(request.build_absolute_uri("/"), 'token')
+            for lib in settings.libraries:
+                if 'id' + lib.id == data['id']:
+                    for field in lib.fields:
+                        if field.column == data['column']:
+                            lib.fields.remove(field)
+
+            # Save table
+            self.set_settings(settings)
+
+            return JsonResponse({'status': 'ok'})
+        return JsonResponse({'status': 'error'})
